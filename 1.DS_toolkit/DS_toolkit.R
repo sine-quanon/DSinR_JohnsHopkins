@@ -98,4 +98,7 @@ sessionInfo()
 #*Blinded to treatment group accounts for the placebo effect.
 #*Randomisation helps mitigate the risk that your group may be biased by an unknown confounder.
 #*Replication with different groups help limit effect of outliers and confounders. Also helps measure variability of the results illuminating the significance of the results initially attained.
+
+#***Big Data *****
+#*Unstructured data: websites,text files,emails,images,audio,video files,social media data.
 #*

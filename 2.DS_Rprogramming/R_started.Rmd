@@ -1,0 +1,836 @@
+---
+title: "R Programming"
+output: html_notebook
+---
+# Week1 R Nuts and Bolts
+## Data Types
+### R Objects and Attributes***
+
+* Vector can only contain objects of the same class
+* R list can contain objects of different classes.
+
+### Creating Vectors:
+* c() concatenate vector.
+* c("a",1) mixed object classes, will make both characters so 1 is converted to character.
+
+### Explicit coercion
+
+* as.numeric
+* as.logical
+* as.character
+
+* nonsensical coercion results vector of NA
+
+### Matrices
+
+* filled column wise
+* can create using dim:
+x=1:12
+dim(x)=c(2,6)
+
+* cbind {column bind}
+* rbind {row binding}
+
+### Factor
+
+* Represent categorical data
+* Orderned or unordered.
+* factor() function has levels attribute allows define if ordered categories.
+
+### Missing Values
+
+* is.na() test objects if na
+* is.nan() test objects if nan
+
+### DataFrames
+
+* create matrix via data.matrix()
+* nrows() and ncols()
+
+### Names Attribute
+
+* allows name elements of the vector via the names()
+* list names work as follow list(x=c(1,2,3,4),y=c(True,False,True),z=c("a","b","c"))
+* matrices names via dimnames(matrix)=list(c(row1,row2),c(col1,col2))
+
+## Reading Tabular Data
+### Reading data
+ 
+* read.table,read.csv for tabular data
+* readLines for text file
+* dget and source reading R code
+* load for reading saved workspaces
+* unserialize for reading single R object in binary
+
+### Writing data
+
+* write.table, writeLines, dump, dput, save and serialize.
+
+### read.table
+
+* header, sep, colClasses {character vector indicating class of each column}, nrows, comment.char {lines beginning with that comment character will be skipped e.g. ">"}, skip {no. lines to skip}, stringAsFactors {should character variables be coded as factors}
+
+### Textual Format
+
+* retain the metadata unlike csv or table so similar to pickle in python remember the class assignments to the columns etc
+* data is also recoverable incase of corruption
+* great for version control thou it isnt space efficient
+
+```{r}
+y=data.frame(a=1,b="a")
+dput(y)
+#write R code
+dput(y,file = "y.R")
+new.y=dget("y.R")
+new.y
+```
+### Interface outside world
+
+* gzfile, bzfile, url
+* readLines of text so can get top of the file
+
+## Subsetting
+### Basics
+
+* [] returns an object of the same class as original so subset a list get a list, subset a vector get a vector
+*[[]] can only be used on df or list and extract a single element that can be of a different class to the list of df
+*$ used extract element of a list of df by name
+```{r}
+x=c(1,3,4,5,6,7,8)
+x[x>4]
+u=x>4
+u
+x[u]
+```
+### Lists
+* can use an assigned variable to call an element of a list using [[]]
+
+```{r}
+x=list(foo=1:4)
+x
+name="foo"
+x[[name]]
+
+#x&name
+#name doesnt exist in the list 
+#using nested elements on a list
+x[1]
+x[[1]]
+x[[c(1,3)]]
+x[[1]][[3]]
+```
+### Partial Matching
+* Saves you having type out the whole variable name:
+```{r}
+x=list(aardvark =1:5)
+x$a
+x[["a"]]
+x[["a",exact=FALSE]]
+```
+### Removing missing values
+
+* Create a logical vector that used index remove the NA using subsetting
+```{r}
+x=c(1,2,NA,4,NA,5)
+bad=is.na(x)
+x[!bad]
+
+#two vectors:
+y=c("a","b",NA,NA,"e","f")
+good=complete.cases(x,y)
+
+x[good]
+y[good]
+
+#Matrix
+airquality[1:6,]
+good=complete.cases(airquality)
+airquality[good,][1:6,]
+```
+### Vectorised operations
+```{r}
+x=1:4;y=6:9
+x+y
+
+x>y
+a=x>y
+x[a]
+
+v=matrix(1:4,2,2);w=matrix(rep(10,4),2,2)
+v*w
+v%*%w #true matrix multiplication
+v
+w
+```
+### swirl exercises
+```{r}
+x<-5+7
+x
+y<-x-3
+y
+z<-c(1.1,9,3.14)
+?c
+z
+c(z,555,z)
+z*2+100
+my_sqrt<-(z-1)^2
+my_sqrt<-sqrt(z-1)
+my_sqrt
+my_div<-z/my_sqrt
+my_div
+c(1,2,3,4)+c(0,10)
+c(1,2,3,4)+c(0,10,100)
+z*2+1000
+my_div
+getwd()
+ls()
+x<-9
+ls()
+dir()
+?list.files
+args(list.files)
+old.dir<-getwd()
+dir.create("testdir")
+setwd("testdir")
+file.create("mytest.R")
+ls()
+ls
+info()
+list.files()
+file.exists("mytest.R")
+file.info(mytest.R)
+file.info("mytest.R")
+file.rename("mytest2.R")
+file.rename("mytest.R""mytest2.R")
+file.rename("mytest.R" to "mytest2.R")
+file.rename("mytest.R" | "mytest2.R")
+file.rename("mytest.R","mytest2.R")
+file.copy("mytest2.R","mytest3.R")
+file.path("mytest3.R")
+file.path("folder1","folder2")
+?dir.create
+dir.create(file.path("testdir2","testdir3"),recursive = TRUE)
+setwd(old.dir)
+1:10
+1:20
+pi:10
+15:1
+`:`
+?`:`
+seq(1,20)
+seq(0,10,0.5)
+seq(0,10,by=0.5)
+my_seq<-seq(0,10,length=30)
+my_seq<-seq(5,10,length=30)
+length(my_seq)
+1:length(my_seq)
+seq(along.with=my_seq)
+seq_along(my_seq)
+rep(0,times=40
+)
+rep(c(0,1,3),times=10)
+rep(c(0,1,2),times=10)
+rep(c(0,1,2),each=10)
+num_vect<-c(0.5,55,-10,6)
+tf<-num_vect<1
+tf
+num_vect>=6
+my_char<-c("My","name","is")
+my_char
+paste(my_char,collapse = " ")
+my_name<-c(my_char," Jonathan")
+my_name
+paste(my_char,collapse = " ")
+paste(my_name,collapse = " ")
+paste("Hello", "world!", sep=" ")
+paste(1:3,c("X","Y","Z",sep=""))
+paste(1:3,c("X","Y","Z"),sep=""))
+paste(1:3,c("X","Y","Z"),sep="")
+paste(LETTERS,1:4,sep="-")
+x<-c(44,NA,5,NA)
+x*3
+y<-rnorm(1000)
+z<-rep(NA,1000)
+my_data<- sample(c(y,z),100)
+is.na(my_data)
+my_na<-is.na(my_data)
+my_na
+my_data==NA
+sum(my_na)
+my_data
+0/0
+Inf-Inf
+x
+x[1:10]
+x[is.na(x)]
+x[!is.na(x)]
+y<-x[!is.na(x)]
+y
+y[y>0]
+x[x>0]
+x[!is.na(x) & x>0]
+x[c(3,5,7)]
+x[0]
+x[3000]
+x[c(-2,-10)]
+x[-c(2,10)]
+vect<-c(foo=11,bar=2,norf=NA)
+vect
+names(vect)
+vect2<-c(11,2,NA)
+names(vect2)<-c("foo","bar","norf")
+identical(vect,vect2)
+vect["bar"]
+vect[c("foo","bar")]
+my_vector<-1:20
+my_vector
+dim(my_vector)
+length(my_vector)
+dim(my_vector)<-c(4,5)
+dim(my_vector)
+attributes(my_vector)
+my_vector
+class(my_vector)
+my_matrix<-my_vector
+?matrix()
+?matrix
+matrix2<-matric(1:20,nrow=4,ncol=5)
+matrix2<-matrix2(1:20,nrow=4,ncol=5)
+matrix2<-matrix(1:20,nrow=4,ncol=5)
+my_matrix2<-matrix(1:20,nrow=4,ncol=5)
+my_matrix2<-matrix(1:20,nrow=4,ncol=5)
+info()
+skip()
+matrix(1:20,nrow=4,ncol=5)
+my_matrix2<-matrix(1:20,nrow=4,ncol=5)
+end
+info()
+bye()
+```
+# Week 2 R Programming
+## Control Structures
+
+* if,else : testing condition
+* for: loop fixed number of times
+* while: execute loop while condition is true
+* repeat: execute infinite loop
+* break: break the execution of a loop
+* next: skip iterations of a loop
+* return: exit a function
+
+### If-else
+
+```{r}
+if(x>3){
+  y=10
+}else{
+  y=0
+}
+```
+
+### For loop
+
+* have a loop index
+```{r}
+#All the same
+x=c(1,2,3,4)
+
+for(i in 1:4){
+  print(x[i])
+}
+for(i in seq_along(x)){
+  print(x[i])
+}
+for(number in x){
+  print(number)
+}
+for(i in 1:4) print(x[i])
+```
+* Nested loops:
+```{r}
+x=matrix(1:9,3,3)
+for( i in seq_len(nrow(x))){
+  for(j in seq_len(ncol(x))){
+    print(x[i,j])
+  }
+}
+```
+### While loop
+* Need initialize a variable or condition
+```{r}
+z=5
+#conditions always evaluated left to right
+while(z>=3 && z<=10){
+  print(z)
+  coin=rbinom(1,1,0.5)
+  if(coin==1){
+    #random walk
+    z=z+1
+  }else{
+    z=z-1
+  }
+}
+```
+### Repeat, Next, Break
+* used to initialise a infinite loop
+```{r}
+x0=1
+#tolerance 
+tol=1e-8
+
+repeat{
+  x1=computeEstimate()
+  if(abs(x1-x0)<tol){
+    break
+  }else{
+    x0=x1
+  }
+}
+```
+* compute estimate just made up function 
+* Danger of repeat loop is its great for getting close to estimate e.g. like gradient descent however if their is no conversion the loop can go on forever
+
+* next used to skip iterations:
+```{r}
+for(i in 1:100){
+  if(i<=20){
+    #skip first 20 iterations
+    next
+  }##do something
+}
+```
+## Functions
+
+```{r}
+x=1:20
+above=function(x,y=10){
+  a=x>y
+  x[a]
+}
+above(x)
+
+col.mean=function(x,removeNA=TRUE){
+  nc=ncol(x)
+  means=numeric(nc)
+  for(i in 1:nc){
+    means[i]=mean(x[,i],na.rm = removeNA)
+  }
+  #returns means
+  means
+}
+x=matrix(1:20,nrow=5,ncol=4)
+col.mean(x)
+```
+* functions can ve passed as arguments for other functions {dplyr} and can also be nested {mean(abs())}
+* if using a function the order is important however if function takes (data,x,y) as order we can change order by naming (n=,y=,data=)
+
+* Lazy argument; function(a,b) however a^2 is only one being used so entering f(2) will not throw an error as b not used. Lazy evaluation function(a,b){print(a) print(b)}, f(2) get 2 and error no b here still get result for 1st portion of the function.
+
+* ... Argument: plot() function default for points is circles want change that to lines so create a myplot function: 
+```{r}
+myplot=function(x,y,type="l",...){
+  plot(x,y,type=type,...)
+  #as plot has a lot of arguments we use ... to specify keep all these arguments as is instead of having type them all out
+}
+```
+* think of ... as a placeholder for functions e.g. cat(...,) ... represent we dont know what strings being concatenated
+
+## Scoping Rules
+### Symbol Binding
+* if create a function same name as a base function how does R know which one use.R searches the functions in an ordered fashion first looking through the global environment continuing on till reaches the base packages. If the function is first found in the global environment {location where your created packages are stored} it will then use your function first.
+
+* lexical scoping: if you have a function(x,y){x^2*y/z}, then z isnt defined in the function or by the user so where do u get z. z is a free variable and its value is searched for in the environment.
+```{r}
+abs=function(x,y){
+  x^2*y/z
+}
+#abs(1,2)
+#error as z not found however
+z=1
+abs(1,2)
+```
+### R Scoping Rules
+*Constructor functions:
+```{r}
+make.power=function(n){
+  pow=function(x){
+    x^n
+  }
+}
+#create a function that can now raise to different powers
+cube=make.power(3)
+square=make.power(2)
+
+cube(4)
+```
+* see the enviroment of the function can use ls(environment(function))
+
+* lexical vs dynamic scoping: lexical searches for the variable starting with the global environment while with dynamic it starts with the working environment.
+
+### Optimisation
+
+* optim, nlm, optimise require pass a function to them whose argument is a vector of parameters.
+* optimisation functions minimise functions, so need use negative log likelihood and not something that maximises them.
+
+```{r}
+#constructor function
+make.NegLogLik <- function(data, fixed = c(FALSE, FALSE)) {
+  #fix some of the parameters
+         params <- fixed
+         function(p) {
+                 params[!fixed] <- p
+                 mu <- params[1]
+                 sigma <- params[2]
+                 
+## Calculate the Normal density
+                 a <- -0.5*length(data)*log(2*pi*sigma^2)
+                 b <- -0.5*sum((data-mu)^2) / (sigma^2)
+                 -(a + b)
+         } 
+ }
+
+set.seed(1)
+normals=rnorm(100,1,2)
+nLL=make.NegLogLik(normal)
+nLL
+
+#local parameter however data is a free variable
+ls(environment(nLL))
+```
+### Dates and Times in R
+
+```{r}
+x <- Sys.time()
+x
+class(x)   ## 'POSIXct' object
+
+p <- as.POSIXlt(x)
+names(unclass(p))
+
+datestring <- c("January 10, 2012 10:40", "December 9, 2011 9:10")
+x <- strptime(datestring, "%B %d, %Y %H:%M")
+
+x <- as.Date("2012-01-01")
+y <- strptime("9 Jan 2011 11:34:21", "%d %b %Y %H:%M:%S") 
+#x-y Warning: Incompatible methods ("-.Date", "-.POSIXt") for "-"
+
+x <- as.POSIXlt(x) 
+x-y
+```
+### Swift
+```{r}
+TRUE==TRUE
+(FALSE==TRUE)==FALSE
+6==7
+6<7
+10<=10
+FALSE & FALSE
+TRUE & c(TRUE,FALSE,FALSE)
+TRUE && c(TRUE,FALSE,FALSE)
+TRUE | c(TRUE,FALSE,FALSE)
+TRUE || c(TRUE,FALSE,FALSE)
+5>8 || 6 != 8 && 4>3.9
+isTRUE(6>4)
+identical("twins","twins")
+xor(5==6,!FALSE)
+ints<-sample(10)
+ints
+ints > 5
+which(ints>7)
+
+```
+
+
+
+
+
+### Homework1 Function take files and works out the means
+```{r}
+pollutantmean <- function(directory, pollutant, id = 1:332) {
+        files_full <- list.files(directory, full.names = TRUE) 
+        
+        dat <- data.frame()
+        
+        for (i in id) {
+                dat <- rbind(dat, read.csv(files_full[i]))
+        }
+        
+        mean(dat[, pollutant], na.rm = TRUE)
+}
+```
+
+
+```{r}
+# Homework 2
+# Make a sum for each day observed of the variables.
+complete <- function(directory, id = 1:332) {
+        files_full <- list.files(directory, full.names = TRUE)
+        dat <- data.frame()
+        
+        for (i in id) {
+                moni_i <- read.csv(files_full[i])
+                nobs <- sum(complete.cases(moni_i))
+                tmp <- data.frame(i, nobs)
+                dat <- rbind(dat, tmp)
+        }
+        
+        colnames(dat) <- c("id", "nobs")
+        dat
+}
+tmp=complete("specdata/",150)
+tmp
+```
+Function that takes a directory of data files and a threshold for complete cases and calculates the correlation between sulfate and nitrate for monitor locations where the number of completely observed cases (on all variables) is greater than the threshold.
+
+```{r}
+# Homework 3
+# The correlation coefficient provides a measure of how two random variables are associated in a “sample”.
+corr <- function(directory, threshold = 0) {
+        files_full <- list.files(directory, full.names = TRUE)
+        dat <- vector(mode = "numeric", length = 0)
+        
+        for (i in 1:length(files_full)) {
+                moni_i <- read.csv(files_full[i])
+                csum <- sum((!is.na(moni_i$sulfate)) & (!is.na(moni_i$nitrate)))
+                if (csum > threshold) {
+                        tmp <- moni_i[which(!is.na(moni_i$sulfate)), ]
+                        submoni_i <- tmp[which(!is.na(tmp$nitrate)), ]
+                        dat <- c(dat, cor(submoni_i$sulfate, submoni_i$nitrate))
+                }
+        }
+        
+        dat
+}
+
+cr <- corr("specdata", 400)
+head(cr)
+
+```
+
+Swirl
+```{r}
+#Functions
+mean(c(2,4,5))
+submit()
+boring_function('My first function!')
+boring_function
+submit()
+my_mean(c(4,5,10))
+submit()
+remainder(5)
+remainder(11,5)
+remainder(divisor=11,num=5)
+remainder(divisor=2,4)
+args(remainder)
+evaluate(function(x){x+1},6)
+evaluate(function(x){x[1]},c(8, 4, 0))
+mad_libs <- function(...){
+  # Do your argument unpacking here!
+  args<-list(...)
+  place<-args[['place']]
+  adjective<-args[['adjective']]
+  noun<-args[['noun']]
+  # Don't modify any code below this comment.
+  # Notice the variables you'll need to create in order for the code below to
+  # be functional!
+  paste("News from", place, "today where", adjective, "students took to the streets in protest of the new", noun, "being installed on campus.")
+
+}
+# The syntax for creating new binary operators
+# User-defined binary operators have the following syntax:
+#      %[whatever]% 
+# where [whatever] represents any valid variable name.
+# "%mult_add_one%" <- function(left, right){ # Notice the quotation marks!
+#   left * right + 1
+# }
+#
+# I could then use this binary operator like `4 %mult_add_one% 5` which would
+# evaluate to 21.
+
+```
+
+```{r}
+#Dates
+d1=Sys.Date()
+unclass(d1)
+d1
+d2=as.Date("1969-01-01")
+d2<-as.Date("1969-01-01")
+unclass(d2)
+t1<-Sys.time()
+t1
+class(t1)
+unclass(t1)
+t2=as.POSIXlt(Sys.time())
+t2<-as.POSIXlt(Sys.time())
+class(t2)
+t2
+unclass(t2)
+str(unclass(t2))
+t2$min
+weekdays(d1)
+weekdays(d2)
+months(t1)
+quarters(t2)
+t3<-strptime("October 17, 1986 08:24")
+swirl()
+skip()
+t3<-"October 17, 1986 08:24"
+t4<-strptime(t3, "%B %d, %Y %H:%M")
+t4
+class(t4)
+Sys.time() > t1
+Sys.time() - t1
+difftime(Sys.time(), t1, units = 'days')
+
+```
+
+# Week3 R Nuts Loop Functions and Debugging
+## Loop Functions
+### lapply
+* Loop over a list with sapply that simplifies the results
+* over an array on the margins summaries of the matrices
+* structure (data,function), has be a list or able coerce into a list
+* lapply(list,function)
+* x=1:10
+* lapply(x, runif,min=0,max=10)
+```{r}
+# apply an anonymous function {similar lambda} using lapply
+
+x=list(a=matrix(1:10,5,2),b=matrix(1:20,5,4))
+lapply(x,function(col) col[,1])
+sapply(x, function(col) col[,1])
+#write anonymous function extract first column of matrix
+```
+With sapply it takes a list thats length 1 and instead returning list returns a vector simplifying things, if its a list with every element the same length then a matrix is returned. Alas if neither case is satified then a list is returned
+
+### apply
+* used to apply functions to rows or columns of a matrix.
+* Not faster then using a for loop but less typing
+* Taking an average of an array, matric is a 2D array.
+```{r}
+x=matrix(rnorm(200),20,10)#matric 20 rows 10 columns
+apply(x,2,mean) #taking the mean of the columns
+apply(x,1,mean) # taking the mean of the rows
+
+apply(x,1,quantile,probs=c(0.25,0.75))
+
+#2 by 2 matrixes:
+a=array(rnorm(2*2*10),c(2,2,10))
+#collapse the third dimension
+apply(a,c(1,2),mean)
+```
+* alternative to apply, rowSum,rowMeans,colSums,colMeans much faster then apply so use those instead
+
+### mapply
+* on a table , multivariate apply, simplified argument indicates whether result should be simplified
+* Takes multiple lists
+
+```{r}
+#Using mapply to do your homework
+means=data.frame()
+for(i in files_full){
+  data=read.csv(i,sep = ',')
+  na=complete.cases(data)
+  data=data[na,]
+  data=data[,c(2,3)]
+  tmp=mapply(mean,data)
+  means=rbind(means,tmp)
+}
+
+#Instant vectorisation of function that doesnt allow vectorisation
+noise=function(n,mean,sd){
+  rnorm(n,mean,sd)
+}
+
+noise(3,1,1)
+#however want more vectors at once
+noise(1:5,1:5,2)
+#creates a vector of just 5 numbers wanted 5 vectors one with 1, next with two, next with 3 etc
+mapply(noise,1:5,1:5,2)
+#Now we get what we wanted we have allowed instant vectorisation
+```
+### tapply
+* subsets a vector, numeric vector, but want to apply function to subsets of the vector
+* tapply(vector, index(e.g. factor like if want apply function only on women),function)
+```{r}
+x=c(rnorm(10),runif(10),rnorm(10,1))
+#create the factors 3 levels 10 of each
+f=gl(3,10)
+tapply(x,f,mean)
+```
+
+### split
+* multivariante version of lapply 
+* takes a vector and splits into greoups determined by factors
+* split(x,factors,drop=False), whether drop whether empty factor levels should be dropped
+
+```{r}
+x=c(rnorm(10),runif(10),rnorm(10,1))
+#create the factors 3 levels 10 of each
+f=gl(3,10)
+split(x,f)
+lapply(split(x,f),mean)
+```
+* see the power of split
+```{r}
+library(datasets)
+head(airquality)
+s=split(airquality,airquality$Month)
+sapply(s,function(x) colMeans(x[,c(2,3,4)]))
+sapply(s,function(x) colMeans(x[,c(2,3,4)],na.rm = TRUE))
+```
+*Split away on multiple levels:
+```{r}
+x=rnorm(10)
+f1=gl(2,5)#sex
+f2=gl(5,2)#race
+interaction(f1,f2)#combination of the two male for each race female for each rave
+
+str(split(x,list(f1,f2),drop=TRUE))
+```
+## Debugging tools
+### Diagnosing the problem
+* message: generic notification,execution function continues
+* warning: Not fatal, execution of function continues, usually when something unexpected happens and you should create an error message for
+* error: fatal problem occured,stop function
+* condition: something unexpected occured
+
+### Basic Tools
+* traceback() : shows what function cause the error
+* debug(function()): will go line by line executing a function see where error originates
+* browser(function()): suspends execution of function and puts function into debug mode, so running the function doesnt work just goes browser mode
+* trace(function()): allows insert debugging code into function in a specific places
+*recover(): allows modify the error behavior
+
+*debug:
+debug(lm)
+lm(y~x)
+
+* recover:
+options(error=recover)
+read.csv("nofile")
+
+```{r}
+#QUIZ
+library(datasets)
+data(iris)
+
+sapply(split(iris$Sepal.Length,iris$Species),mean)
+apply(iris[, 1:4], 2, mean)
+
+library(datasets)
+data(mtcars)
+
+#calculate the average miles per gallon (mpg) by number of cylinders in the car (cyl)? 
+tapply(mtcars$mpg, mtcars$cyl, mean)
+sapply(split(mtcars$mpg, mtcars$cyl), mean)
+with(mtcars, tapply(mpg, cyl, mean))
+
+x=sapply(split(mtcars$hp, mtcars$cyl), mean)
+abs=abs(x[1]-x[3])
+abs
+
+```
+
+
