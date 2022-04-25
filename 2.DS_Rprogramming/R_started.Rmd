@@ -944,21 +944,21 @@ x=hilbert(1000)
 system.time(svd(x))
 #user cpu, elapse is the wait time
 ```
-* 
+* Rprof() starts the profiler in R, with summaryRprof() summarising output of Rprof. Dont use in conjunction with system.time()
+* Rprof() keeps track of the call stack at regular intervals.
+* summaryRprof() the data can be normalised by.total {divides the time spent by total run time spent using the function} or by.self {does same but first minuses time spent on other lower level functions e.g. lm() is the top level but has helper function attached to it that are also used. So we minus those see how much time actually spent on the top lm function.}
+
+swirl:
 ```{r}
-1.2
-2.1
-3.4
-4.not ppoid
-5.not 2
-6.1
-7.2
-8.not 3
-9.1
-10.not 4
+summary(plants)
+table(plants$Active_Growth_Period)
+str(plants)
+?sample
+sample(1:6,4,replace = TRUE)
+sample(1:20,10)
+LETTERS
+
 ```
-
-
 
 ### Assignment:
 #### Finding the best hospital in the state
