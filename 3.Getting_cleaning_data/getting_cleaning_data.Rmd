@@ -5,15 +5,88 @@ output: html_notebook
 # Getting and Cleaning Data
 # Week 1
 ## Obtaining Data
-### Obtaining data motivations
-### Raw and Processed Data
 ### Components of Tidy Data
+* must have the metadata or codebook describing what the variables are what the represent.
+* Need have R script to represent transformations from raw to tidy data
+* Be explicit with variable names
+* Codebook include variable units, summary choices {how mean or other descriptive summary were calculated}. Include study design
+
 ### Downloading Files
+* Relative: .{means current directory}
+setwd("./data),setwd("../)
+Absolute:
+setwd("/Users/mephisto/data/")
+* Check directory exists:file.exists()
+Create directory: dir.create() e.g. create dir if doesnt exist
+if(!file.exists("data)){
+  dir.create("data")
+}
+*download.file(url,destfile,method)
+method:"curl" used with https
+To keep tabs on date as files often updates:
+dateDownloaded<-date()
+dateDownloaded
+
 ## Reading Data
 ### Reading Local Files
+* read.table(na.strings,skip,quote), not great for really large files
+na.strings: tells are character representing na 
+quote="" helps R deal with random quotes inserted into data
+
 ### Reading Excel Files
+* read.xlsx(),read.xlsx2(much faster) {library xlsx}
+*read.xlsx(sheet,colIndex,rowIndex)
+sheet: tells R which sheet data is on
+row/colIndex: allows select subset of the data want to analyse
+*XLConnect more flexible is better
+
 ### Reading XML
+* Web scraping
+* Structure: markup is labels, content is text inbetween
+* Tags general labels: start:- <section> end:- </section> empty:- <line-break />
+Elements specific examples of tags:- <Greeting> Hello world </Greeting>
+Attributes:- added components of the img tag <img src="jonny.jpg"/>
+```{r}
+library(XML)
+library(RCurl)
+fileURL<-"https://www.w3schools.com/xml/simple.xml"
+xData <- getURL(fileURL)
+doc<-xmlTreeParse(xData,useInternalNodes = TRUE)
+rootNode<-xmlRoot(doc)
+names(rootNode)
+#5 different food items so show 5 foods
+
+rootNode[[1]]#show 1st food element
+rootNode[[1]][1]
+
+#Programmatically extract parts of the file
+xmlSApply(rootNode,xmlValue)#all text in the xml
+
+#use Xpath get targeted data
+#doesnt work if useInternalNodes isnt true
+#get nodes that correspond to //{work}
+xpathSApply(rootNode,"//name",xmlValue)
+xpathSApply(rootNode,"//price",xmlValue)
+```
+Extract info from html site:
+```{r}
+fileURL<-"https://www.espn.co.uk/nfl/team/_/name/bal/baltimore-ravens"
+xData <- getURL(fileURL)
+doc<-htmlTreeParse(xData,useInternalNodes = TRUE)
+list_items<-xpathSApply(doc,"//li",xmlValue)
+list_items
+```
 ### Reading JSON
+* data stored as numbers,strings,booleans,arrays or objects
+```{r}
+library(jsonlite)
+jsonData<-fromJSON("https://api.github.com/users/sine-quanon/repos")
+names(jsonData)#data.frame
+names(jsonData$owner)#dataframe within dataframe
+```
+
+
+
 ### data.table Package
 
 # Week 2
@@ -34,14 +107,10 @@ output: html_notebook
 ### Merging Data
 
 # Week 4
-## Obtaining Data
-### Obtaining data motivations
-### Raw and Processed Data
-### Components of Tidy Data
-### Downloading Files
-## Reading Data
-### Reading Local Files
-### Reading Excel Files
-### Reading XML
-### Reading JSON
-### data.table Package
+## Editing Variables
+### Editing text variables
+### Regular Expressions
+### Working with Dates
+### Data Resources
+
+

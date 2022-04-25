@@ -226,26 +226,36 @@ pre code {
 <h1>Week 1</h1>
 <div id="obtaining-data" class="section level2">
 <h2>Obtaining Data</h2>
-<div id="obtaining-data-motivations" class="section level3">
-<h3>Obtaining data motivations</h3>
-</div>
-<div id="raw-and-processed-data" class="section level3">
-<h3>Raw and Processed Data</h3>
-</div>
 <div id="components-of-tidy-data" class="section level3">
 <h3>Components of Tidy Data</h3>
+<ul>
+<li>must have the metadata or codebook describing what the variables are what the represent.</li>
+<li>Need have R script to represent transformations from raw to tidy data</li>
+<li>Be explicit with variable names</li>
+<li>Codebook include variable units, summary choices {how mean or other descriptive summary were calculated}. Include study design</li>
+</ul>
 </div>
 <div id="downloading-files" class="section level3">
 <h3>Downloading Files</h3>
+<ul>
+<li>Relative: .{means current directory} setwd(“./data),setwd(”../) Absolute: setwd(“/Users/mephisto/data/”)</li>
+<li>Check directory exists:file.exists() Create directory: dir.create() e.g. create dir if doesnt exist if(!file.exists(“data)){ dir.create(”data”) } *download.file(url,destfile,method) method:“curl” used with https To keep tabs on date as files often updates: dateDownloaded&lt;-date() dateDownloaded</li>
+</ul>
 </div>
 </div>
 <div id="reading-data" class="section level2">
 <h2>Reading Data</h2>
 <div id="reading-local-files" class="section level3">
 <h3>Reading Local Files</h3>
+<ul>
+<li>read.table(na.strings,skip,quote), not great for really large files na.strings: tells are character representing na quote=“” helps R deal with random quotes inserted into data</li>
+</ul>
 </div>
 <div id="reading-excel-files" class="section level3">
 <h3>Reading Excel Files</h3>
+<ul>
+<li>read.xlsx(),read.xlsx2(much faster) {library xlsx} <em>read.xlsx(sheet,colIndex,rowIndex) sheet: tells R which sheet data is on row/colIndex: allows select subset of the data want to analyse </em>XLConnect more flexible is better</li>
+</ul>
 </div>
 <div id="reading-xml" class="section level3">
 <h3>Reading XML</h3>
@@ -305,43 +315,25 @@ pre code {
 </div>
 <div id="week-4" class="section level1">
 <h1>Week 4</h1>
-<div id="obtaining-data-1" class="section level2">
-<h2>Obtaining Data</h2>
-<div id="obtaining-data-motivations-1" class="section level3">
-<h3>Obtaining data motivations</h3>
+<div id="editing-variables" class="section level2">
+<h2>Editing Variables</h2>
+<div id="editing-text-variables" class="section level3">
+<h3>Editing text variables</h3>
 </div>
-<div id="raw-and-processed-data-1" class="section level3">
-<h3>Raw and Processed Data</h3>
+<div id="regular-expressions" class="section level3">
+<h3>Regular Expressions</h3>
 </div>
-<div id="components-of-tidy-data-1" class="section level3">
-<h3>Components of Tidy Data</h3>
+<div id="working-with-dates" class="section level3">
+<h3>Working with Dates</h3>
 </div>
-<div id="downloading-files-1" class="section level3">
-<h3>Downloading Files</h3>
-</div>
-</div>
-<div id="reading-data-1" class="section level2">
-<h2>Reading Data</h2>
-<div id="reading-local-files-1" class="section level3">
-<h3>Reading Local Files</h3>
-</div>
-<div id="reading-excel-files-1" class="section level3">
-<h3>Reading Excel Files</h3>
-</div>
-<div id="reading-xml-1" class="section level3">
-<h3>Reading XML</h3>
-</div>
-<div id="reading-json-1" class="section level3">
-<h3>Reading JSON</h3>
-</div>
-<div id="data.table-package-1" class="section level3">
-<h3>data.table Package</h3>
+<div id="data-resources" class="section level3">
+<h3>Data Resources</h3>
 <!-- rnb-text-end -->
 </div>
 </div>
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiR2V0dGluZyBhbmQgQ2xlYW5pbmcgRGF0YSIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQojIEdldHRpbmcgYW5kIENsZWFuaW5nIERhdGEKIyBXZWVrIDEKIyMgT2J0YWluaW5nIERhdGEKIyMjIE9idGFpbmluZyBkYXRhIG1vdGl2YXRpb25zCiMjIyBSYXcgYW5kIFByb2Nlc3NlZCBEYXRhCiMjIyBDb21wb25lbnRzIG9mIFRpZHkgRGF0YQojIyMgRG93bmxvYWRpbmcgRmlsZXMKIyMgUmVhZGluZyBEYXRhCiMjIyBSZWFkaW5nIExvY2FsIEZpbGVzCiMjIyBSZWFkaW5nIEV4Y2VsIEZpbGVzCiMjIyBSZWFkaW5nIFhNTAojIyMgUmVhZGluZyBKU09OCiMjIyBkYXRhLnRhYmxlIFBhY2thZ2UKCiMgV2VlayAyCiMjIFJlYWRpbmcgZnJvbSBkaWZmZXJlbnQgZGF0YSBzb3VyY2VzCiMjIyBGcm9tIE15U1FMCiMjIyBGcm9tIEhERjUKIyMjIEZyb20gdGhlIHdlYgojIyMgRnJvbSBBUElzCiMjIyBGcm9tIG90aGVyIHNvdXJjZXMKCiMgV2VlayAzCiMjIE1hbmlwdWxhdGluZyBEYXRhCiMjIyBTdWJzZXR0aW5nIGFuZCBTb3J0aW5nCiMjIyBTdW1tYXJpc2luZyBEYXRhCiMjIyBDcmVhdGluZyBuZXcgdmFyaWFibGVzCiMjIyBSZXNoYXBpbmcgRGF0YQojIyMgTWFuYWdpbmcgZGF0YWZyYW1lcyB3aXRoIGRwbHlyCiMjIyBNZXJnaW5nIERhdGEKCiMgV2VlayA0CiMjIE9idGFpbmluZyBEYXRhCiMjIyBPYnRhaW5pbmcgZGF0YSBtb3RpdmF0aW9ucwojIyMgUmF3IGFuZCBQcm9jZXNzZWQgRGF0YQojIyMgQ29tcG9uZW50cyBvZiBUaWR5IERhdGEKIyMjIERvd25sb2FkaW5nIEZpbGVzCiMjIFJlYWRpbmcgRGF0YQojIyMgUmVhZGluZyBMb2NhbCBGaWxlcwojIyMgUmVhZGluZyBFeGNlbCBGaWxlcwojIyMgUmVhZGluZyBYTUwKIyMjIFJlYWRpbmcgSlNPTgojIyMgZGF0YS50YWJsZSBQYWNrYWdlCg==</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiR2V0dGluZyBhbmQgQ2xlYW5pbmcgRGF0YSIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQojIEdldHRpbmcgYW5kIENsZWFuaW5nIERhdGEKIyBXZWVrIDEKIyMgT2J0YWluaW5nIERhdGEKIyMjIENvbXBvbmVudHMgb2YgVGlkeSBEYXRhCiogbXVzdCBoYXZlIHRoZSBtZXRhZGF0YSBvciBjb2RlYm9vayBkZXNjcmliaW5nIHdoYXQgdGhlIHZhcmlhYmxlcyBhcmUgd2hhdCB0aGUgcmVwcmVzZW50LgoqIE5lZWQgaGF2ZSBSIHNjcmlwdCB0byByZXByZXNlbnQgdHJhbnNmb3JtYXRpb25zIGZyb20gcmF3IHRvIHRpZHkgZGF0YQoqIEJlIGV4cGxpY2l0IHdpdGggdmFyaWFibGUgbmFtZXMKKiBDb2RlYm9vayBpbmNsdWRlIHZhcmlhYmxlIHVuaXRzLCBzdW1tYXJ5IGNob2ljZXMge2hvdyBtZWFuIG9yIG90aGVyIGRlc2NyaXB0aXZlIHN1bW1hcnkgd2VyZSBjYWxjdWxhdGVkfS4gSW5jbHVkZSBzdHVkeSBkZXNpZ24KCiMjIyBEb3dubG9hZGluZyBGaWxlcwoqIFJlbGF0aXZlOiAue21lYW5zIGN1cnJlbnQgZGlyZWN0b3J5fQpzZXR3ZCgiLi9kYXRhKSxzZXR3ZCgiLi4vKQpBYnNvbHV0ZToKc2V0d2QoIi9Vc2Vycy9tZXBoaXN0by9kYXRhLyIpCiogQ2hlY2sgZGlyZWN0b3J5IGV4aXN0czpmaWxlLmV4aXN0cygpCkNyZWF0ZSBkaXJlY3Rvcnk6IGRpci5jcmVhdGUoKSBlLmcuIGNyZWF0ZSBkaXIgaWYgZG9lc250IGV4aXN0CmlmKCFmaWxlLmV4aXN0cygiZGF0YSkpewogIGRpci5jcmVhdGUoImRhdGEiKQp9Cipkb3dubG9hZC5maWxlKHVybCxkZXN0ZmlsZSxtZXRob2QpCm1ldGhvZDoiY3VybCIgdXNlZCB3aXRoIGh0dHBzClRvIGtlZXAgdGFicyBvbiBkYXRlIGFzIGZpbGVzIG9mdGVuIHVwZGF0ZXM6CmRhdGVEb3dubG9hZGVkPC1kYXRlKCkKZGF0ZURvd25sb2FkZWQKCiMjIFJlYWRpbmcgRGF0YQojIyMgUmVhZGluZyBMb2NhbCBGaWxlcwoqIHJlYWQudGFibGUobmEuc3RyaW5ncyxza2lwLHF1b3RlKSwgbm90IGdyZWF0IGZvciByZWFsbHkgbGFyZ2UgZmlsZXMKbmEuc3RyaW5nczogdGVsbHMgYXJlIGNoYXJhY3RlciByZXByZXNlbnRpbmcgbmEgCnF1b3RlPSIiIGhlbHBzIFIgZGVhbCB3aXRoIHJhbmRvbSBxdW90ZXMgaW5zZXJ0ZWQgaW50byBkYXRhCgojIyMgUmVhZGluZyBFeGNlbCBGaWxlcwoqIHJlYWQueGxzeCgpLHJlYWQueGxzeDIobXVjaCBmYXN0ZXIpIHtsaWJyYXJ5IHhsc3h9CipyZWFkLnhsc3goc2hlZXQsY29sSW5kZXgscm93SW5kZXgpCnNoZWV0OiB0ZWxscyBSIHdoaWNoIHNoZWV0IGRhdGEgaXMgb24Kcm93L2NvbEluZGV4OiBhbGxvd3Mgc2VsZWN0IHN1YnNldCBvZiB0aGUgZGF0YSB3YW50IHRvIGFuYWx5c2UKKlhMQ29ubmVjdCBtb3JlIGZsZXhpYmxlIGlzIGJldHRlcgoKIyMjIFJlYWRpbmcgWE1MCgoKIyMjIFJlYWRpbmcgSlNPTgojIyMgZGF0YS50YWJsZSBQYWNrYWdlCgojIFdlZWsgMgojIyBSZWFkaW5nIGZyb20gZGlmZmVyZW50IGRhdGEgc291cmNlcwojIyMgRnJvbSBNeVNRTAojIyMgRnJvbSBIREY1CiMjIyBGcm9tIHRoZSB3ZWIKIyMjIEZyb20gQVBJcwojIyMgRnJvbSBvdGhlciBzb3VyY2VzCgojIFdlZWsgMwojIyBNYW5pcHVsYXRpbmcgRGF0YQojIyMgU3Vic2V0dGluZyBhbmQgU29ydGluZwojIyMgU3VtbWFyaXNpbmcgRGF0YQojIyMgQ3JlYXRpbmcgbmV3IHZhcmlhYmxlcwojIyMgUmVzaGFwaW5nIERhdGEKIyMjIE1hbmFnaW5nIGRhdGFmcmFtZXMgd2l0aCBkcGx5cgojIyMgTWVyZ2luZyBEYXRhCgojIFdlZWsgNAojIyBFZGl0aW5nIFZhcmlhYmxlcwojIyMgRWRpdGluZyB0ZXh0IHZhcmlhYmxlcwojIyMgUmVndWxhciBFeHByZXNzaW9ucwojIyMgV29ya2luZyB3aXRoIERhdGVzCiMjIyBEYXRhIFJlc291cmNlcwoKCg==</div>
 
 
 
