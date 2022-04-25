@@ -1,0 +1,47 @@
+---
+title: "Getting and Cleaning Data"
+output: html_notebook
+---
+# Getting and Cleaning Data
+# Week 1
+## Obtaining Data
+### Obtaining data motivations
+### Raw and Processed Data
+### Components of Tidy Data
+### Downloading Files
+## Reading Data
+### Reading Local Files
+### Reading Excel Files
+### Reading XML
+### Reading JSON
+### data.table Package
+
+# Week 2
+## Reading from different data sources
+### From MySQL
+### From HDF5
+### From the web
+### From APIs
+### From other sources
+
+# Week 3
+## Manipulating Data
+### Subsetting and Sorting
+### Summarising Data
+### Creating new variables
+### Reshaping Data
+### Managing dataframes with dplyr
+### Merging Data
+
+# Week 4
+## Obtaining Data
+### Obtaining data motivations
+### Raw and Processed Data
+### Components of Tidy Data
+### Downloading Files
+## Reading Data
+### Reading Local Files
+### Reading Excel Files
+### Reading XML
+### Reading JSON
+### data.table Package
