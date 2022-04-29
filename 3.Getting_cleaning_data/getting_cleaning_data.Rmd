@@ -593,7 +593,9 @@ str_trim("Jonathan      ")
 * ^([Gg]ood|[Bb]ad): Both good/Good and Bad/bad at the start of the sentence
 *[Gg]eorge( [Ww]\.)? [Bb]ush: whether have W. w. initial thou doesnt have to have it. \ used as the escape character as . is a metacharscter 
 * (.*)- means any content within parenthesis even ()
-
+* [0-9]+ (.*)[0-9]+ : atleast 1 number followed by anything then atleast 1 number. * any number including none + atleast 1 number e.g. 720 , 2 or 3 etc
+* {and} let us specify the minimum number of matches of an expression
+[Bb]ush( +[^ ]+ +){1,5} debate- Bush/bush then least 1 space something then another one space {between 1 or 5 words} followed by debate e.g Bush doesnt need these debates: would be one as 4 words between bush and debates
 
 
 
@@ -601,59 +603,6 @@ str_trim("Jonathan      ")
 
 ### Working with Dates
 ### Data Resources
-
-
-
-```{r}
-#Load the datasets
-#features names
-features = read.table("week4_assignment/UCI HAR Dataset/features.txt")
-labels <- read.table("week4_assignment/UCI HAR Dataset/activity_labels.txt", col.names = c("code", "activity"))
-
-#Numeric data
-X_test=read.table("week4_assignment/UCI HAR Dataset/test/X_test.txt",col.names = features[,2])
-Y_test=read.table("week4_assignment/UCI HAR Dataset/test/Y_test.txt",col.names = "code")
-X_train=read.table("week4_assignment/UCI HAR Dataset/train/X_train.txt",col.names = features[,2])
-Y_train=read.table("week4_assignment/UCI HAR Dataset/train/y_train.txt",col.names = "code")
-
-#labels
-subject_test=read.table("week4_assignment/UCI HAR Dataset/test/subject_test.txt",col.names = "subject")
-subject_train=read.table("week4_assignment/UCI HAR Dataset/train/subject_train.txt",col.names = "subject")
-```
-```{r}
-# Merge the training and test set with the metadata
-X=rbind(X_train,X_test)
-Y=rbind(Y_train,Y_test)
-subject=rbind(subject_train,subject_test)
-data=cbind(X,Y,subject)
-```
-```{r}
-#extract the mean and sd for each measurement
-library(dplyr)
-tidy_data = data %>% select(contains(c("mean","std")),subject, code) %>% rename(activity = code)
-```
-```{r}
-#convert numeric
-tidy_data$activity=labels[tidy_data$activity,2]
-tidy_data$activity=as.factor(tidy_data$activity)
-```
-```{r}
-#appropriate descriptive names for the columns
-colname = c("Acc"= "Accelerometer","Gyro"= "Gyroscope","BodyBody"= "Body","Mag"= "Magnitude","^t"= "Time","^f"= "Frequency","tBody"= "TimeBody","-freq()"= "Frequency","angle"= "Angle","gravity"= "Gravity")
-
-for(a in names(colname)){
-  names(tidy_data)=gsub(a, colname[a], names(tidy_data))
-}
-```
-```{r}
-#Averages of each variable for each activity and subject
-final_tidy = tidy_data %>% group_by(subject,activity) %>% summarise_all(list(mean))
-final_tidy
-```
-```{r}
-write.table(final_tidy, "final_tidy.txt", row.name=FALSE)
-```
-
 
 
 
