@@ -45,7 +45,7 @@ row/colIndex: allows select subset of the data want to analyse
 * Structure: markup is labels, content is text inbetween
 * Tags general labels: start:- <section> end:- </section> empty:- <line-break />
 Elements specific examples of tags:- <Greeting> Hello world </Greeting>
-Attributes:- added components of the img tag <img src="jonny.jpg"/>
+Attributes:- added components of the img tag
 ```{r}
 library(XML)
 library(RCurl)
@@ -84,33 +84,583 @@ jsonData<-fromJSON("https://api.github.com/users/sine-quanon/repos")
 names(jsonData)#data.frame
 names(jsonData$owner)#dataframe within dataframe
 ```
-
-
-
 ### data.table Package
+* much much faster then creating a df, faster at subsetting, grouping and updating
+```{r}
+#library(data.table)
+df=data.table(x=rnorm(9),y=rep(c("a","b","c"),each=3),z=rnorm(9))
+tables()#give u info about df
+df[c(2,3)]#subset with one index its defaults to rows
 
+#Calculate values for variables with expressions:
+df[,list(mean(x),sum(z))]#x and z column names
+#add new column
+df[,w:=z*2]
+#create function temp variable x+z then added to 5 and get the log 2 of the result
+df[,m:={tmp<-(x+z); log2(tmp+5)}]
+#get the sum of x grouped by y
+df[, sum(x), by=y] 
+#add binary variable
+df[,a:=x>0]
+#new variable x+w == True get mean put same value in each and work out mean x+w == False put same value in those
+df[,b:=mean(x+w),by=a]
+
+#create large number {1E5 = 100000}, then use .N to quickly group those numbers by categorical variable
+set.seed(42)
+DT<- data.table(x=sample(letters[1:3],1E5,TRUE))
+DT[,.N ,by=x]
+```
+* Can also set a key {categorical row} using data.table and used save time so when want group by always use that set key or column:
+```{r}
+DT <- data.table(x=rep(c("a","b","c"),each=100),y=rnorm(300))
+setkey(DT,x)
+DT['a']
+
+fread(file)
+#much faster read in file using data.table then to use
+read.table
+```
+Quiz:
+```{r}
+library(openxlsx)
+URL<-"https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FDATA.gov_NGAP.xlsx"
+#NEED specify the name of the file so u name it jesus
+destfile="week1_quiz/NAGP.xlsx"
+download.file(URL,destfile)
+```
+```{r}
+dat=read.xlsx("week1_quiz/NAGP.xlsx",sheet = 1,cols = c(7:15),rows = c(18:23))
+URL<-"https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Frestaurants.xml"
+
+destfile="week1_quiz/restaurant.xml"
+download.file(URL,destfile)
+```
+```{r}
+library(XML)
+doc<-xmlTreeParse("week1_quiz/restaurant.xml",useInternalNodes = TRUE)
+list_items<-xpathSApply(doc,"//zipcode",xmlValue)
+```
 # Week 2
 ## Reading from different data sources
 ### From MySQL
-### From HDF5
-### From the web
-### From APIs
-### From other sources
+* library(RMySQL)
+* Connect with mysql database UCSC Genome Bioinformatics:
+```{r}
+library(RMySQL)
+#opens a connection with handle ucscDb
+ucscDb<- dbConnect(MySQL(),user="genome",host="genome-mysql.cse.ucsc.edu")
+#run a sql command show database, and dbdisconnect after get data
+result<-dbGetQuery(ucscDB,"show databases;"); dbDisconnect(ucscDb)
+```
+```{r}
+#gonna analyse the hg19 genome
+hg19<- dbConnect(MySQL(),user="genome",db="hg19",host="genome-mysql.cse.ucsc.edu")
+allTables<-dbListTables(hg19)
+length(allTables)
+```
+```{r}
+allTables[1:5]
+#each different datatype get own table
+#lets look at all the fields {column names} in a particular table:
+dbListFields(hg19,"affyU133Plus2")
+#How many rows:
+dbGetQuery(hg19,"select count(*) from affyU133Plus2")
+#get the table to look at it
+affyData<-dbReadTable(hg19,"affyU133Plus2")
+head(affyData)
+```
+```{r}
+#Select subset of the data as db can be huge {* all data}
+query<-dbSendQuery(hg19,"select * from affyU133Plus2 where misMatches between 1 and 3")
+#quantiles show that data between 1 and 3
+affyMis<-fetch(query);quantile(affyMis$misMatches)
+#use fetch & n to fetch only top 10 records/rows
+#need clear the query once data been fetched
+affyMissSmall<-fetch(query,n=10);dbClearResult(query)
+dim(affyMissSmall)
+#remember close connection
+dbDisconnect(hg19)
+#Use rMySQL vignette
+```
+```{r}
+#sqldf package allows sql commands executed on R df
+library(sqldf)
+#detach("package:RMySQL", unload=TRUE)
+#need detach RMySQL or wont work
+a3r <- subset(farms, Manag %in% c("BF", "HF"))
+a3s <- sqldf("select * from farms where Manag in ('BF', 'HF')")
+```
 
+### From HDF5
+* large datasets with range of types. Hierarchical data format, with multidimensional array of data elements with metadata.
+```{r}
+library(rhdf5)
+created = h5createFile("example.h5")
+```
+```{r}
+#create groups within the file
+created=h5createGroup("week2/example.h5","foo")
+created=h5createGroup("week2/example.h5","baa")
+created=h5createGroup("week2/example.h5","foo/foobaa")
+h5ls("week2/example.h5")
+```
+```{r}
+#Write to groups
+A=matrix(1:10,nr=5,nc=2)
+h5write(A,"week2/example.h5","foo/A")
+B=array(seq(0.1,2.0,by=0.1),dim=c(5,2,2))
+#add attributes to array metadata
+attr(B,"scale")<-"liter"
+h5write(B,"week2/example.h5","foo/foobaa/B")
+h5ls("week2/example.h5")
+
+#write a data set and instead of assign to group can add as top level group
+df=data.frame(1L:5L,seq(0,1,length.out=5),c("ab","cde","fghi","a","s"),stringsAsFactors = FALSE)
+h5write(df,"week2/example.h5","df")
+h5ls("week2/example.h5")
+```
+```{r}
+#Reading data
+readA=h5read("week2/example.h5","df")
+readA
+```
+### From the web
+* Webscrapping get data from HTML
+```{r}
+# Using readLines to get data off a webpage
+con=url("https://en.wikipedia.org/wiki/Artificial_intelligence")
+htmlCode=readLines(con)
+#close connection when get data took ages
+close(con)
+htmlCode
+```
+```{r}
+#can use get from httr package instead
+library(httr)
+url<-"https://en.wikipedia.org/wiki/Artificial_intelligence"
+html2=GET(url)
+content2 = content(html2,as="text")
+parsedHTML=htmlParse(content2,asText=TRUE)
+xpathSApply(parsedHTML,"//title",xmlValue)
+
+```
+```{r}
+library(httr)
+url<-"https://api.github.com/users/jtleek/repos"
+html2=GET(url)
+content2 = content(html2,as="text")
+parsedHTML=htmlParse(content2,asText=TRUE)
+xpathSApply(parsedHTML,"//time",xmlValue)
+```
+Accessing Websites with passwords:
+```{r}
+library(httr)
+url<-"https://httpbin.org/basic-auth/user/passwd"
+html3=GET(url,authenticate("user","passwd"))
+#test site so real site need put in username password
+html3
+names(html3)
+
+#Using handle allows you get cookies show youve authenticated so dont have authemticate every time
+google=handle("http://google.com")
+pg1=GET(handle=google,path="/")
+```
+### From APIs
+* Application programming interfaces.
+* NEED CREATE A DEVELOPERS ACCOUNT
+```{r}
+google_app <- oauth_app(
+  "google",
+  key = "123456789.apps.googleusercontent.com",
+  secret = "abcdefghijklmnopqrstuvwxyz"
+)
+sig = sign_oauth1.0(google_app, token = "tokenhere", token_secret = "secrethere")
+homegoogle=Get("api.twitter.com/1.1/statuses/home_timeline.json",sig)
+#gettting statuses on homepage and pass as a json file
+```
+Converting the json object:
+```{r}
+json1=content(homegoogle)
+json2=jsonlite::fromJSON(toJSON(json1))
+#convert to more readible json
+```
 # Week 3
 ## Manipulating Data
 ### Subsetting and Sorting
-### Summarising Data
-### Creating new variables
-### Reshaping Data
-### Managing dataframes with dplyr
-### Merging Data
+```{r}
+set.seed(42)
+x<-data.frame("var1"=sample(1:5),"var2"=sample(6:10),"var3"=sample(11:15))
+X<-x[sample(1:5),]
+X$var2[c(1,3)]=NA
+X[1:2,"var2"]
+# Subset by row:
+X[(X$var1<=3 & X$var3>11),]
+X[(X$var1<=3 |  X$var3>11),]
 
+#Dealing with NAs
+X[which(X$var2>8),]
+
+#Sort
+sort(X$var2,decreasing = TRUE,na.last = TRUE)
+
+#Ordering
+X[order(X$var1),]
+#sort so rows in creasing order from variable 1
+X[order(X$var1,X$var3),]
+#ordering with plyr
+library(plyr)
+arrange(X,desc(var1))
+
+#Adding rows and columns
+Y<-cbind(X,rnorm(5))
+Y
+Z<-rbind(X,rnorm(3))
+Z
+```
+### Summarising Data
+```{r}
+#url<-"https://data.baltimorecity.gov/api/views/k5ry-ef3g/rows.csv?accessType=DOWNLOAD"
+#download.file(url,"week3/restaurant.csv",method = "curl")
+restaurant<-read.csv("week3/restaurants.csv")
+```
+```{r}
+head(restaurant)
+summary(restaurant)
+str(restaurant)
+#look at variablility
+quantile(restaurant$councilDistrict,na.rm = TRUE)
+quantile(restaurant$councilDistrict,probs = c(0.25,0.5,0.75))
+#table doesnt use na so important specify their use
+table(restaurant$zipCode,useNA = "ifany")
+any(is.na(restaurant$councilDistrict))
+#if evcery value satisfy the condition
+all(restaurant$zipCode>0)
+colSums(is.na(restaurant))
+#show no missing values in the dataset
+all(colSums(is.na(restaurant))==0)
+#check is particular variable inside column
+table(restaurant$zipCode %in% c("21212"))
+
+#isolate for variables with particular characteristics
+restaurant[restaurant$zipCode %in% c("21212","21213"),]
+str(restaurant)
+```
+```{r}
+data=airquality
+str(airquality)
+#crosstabs
+#wind is values in the table broken down by month and day
+xt=xtabs(Wind~ Month+Day, data=data)
+xt
+#ftable summarise in a more compact form
+ftable(xt)
+#size of dataset
+print(object.size(airquality),units = "Mb")
+```
+### Creating new variables
+* Often create missingness indicators (where hav missing data), Cutting up quantitative variables, applying transforms 
+```{r}
+#Creating sequences
+seq(1,10,by=2);seq(1,10,length=3)
+
+#subsetting variables
+#new column restaurant near me
+restaurant$nearme=restaurant$neighborhood %in% c("Roland Park","Homeland")
+table(restaurant$nearme)
+
+#Creating binary variables (know data is wrong)
+#ifelse send condition if zipcode less then zero get true which we can then filter out
+restaurant$zipWrong=ifelse(restaurant$zipCode < 0, TRUE,FALSE)
+table(restaurant$zipWrong,restaurant$zipCode<0)
+
+#Creating categorical variables by binning
+restaurant$zipGroups=cut(restaurant$zipCode,breaks = quantile(restaurant$zipCode))
+table(restaurant$zipGroups,restaurant$zipCode)
+
+#easier cut
+#cuts by number we want so specify 4 groups
+library(Hmisc)
+restaurant$zipGroups = cut2(restaurant$zipCode,g=4)
+
+#Creating factor variables:
+restaurant$zcf <- factor(restaurant$zipCode)
+#now made into levels this case 32
+
+#Designate the levels of factors 
+mf<-sample(c("m","f",size=10,replace=TRUE))
+#class character need alter and decide how levels work
+mnf<- factor(mf,levels = c("m","f"))
+relevel(mnf,ref="m")
+#alter the level order as R goes alphabetically
+
+#Use mutate make columns as well as new df
+library(plyr)
+restaurant2=mutate(restaurant,zipGroups=cut2(zipCode,g=4))
+```
+* Common Transformations:
+abs,sqrt,ceiling,floor,round(x,digit=n),signif(x,digit=n),cos(x),log(x),exp(x)
+
+### Reshaping Data
+* Tidy data , 1 variable per column, 1 observation per row
+```{r}
+library(reshape2)
+data=mtcars
+mtcars$carname=rownames(mtcars)
+#melting df so one row for mpg one row for hp
+carmelt=melt(mtcars,id=c("carname","gear","cyl"),measure.vars=c("mpg","hp"))
+head(carmelt,n=3)
+#reshape so tall and skinny
+```
+```{r}
+#casting df to particular shape can pass mean or just cyl ~ variable.
+cyldata=dcast(carmelt,cyl~variable,mean)
+cyldata
+
+#Averaging values
+tapply(InsectSprays$count, InsectSprays$spray, sum)
+#Another way - split the count per the spray type
+split(InsectSprays$count,InsectSprays$spray)
+#doing same plyr package
+ddply(InsectSprays,.(spray,count),summarize,sum=sum(count))
+```
+### Managing dataframes with dplyr
+* dplyr very fast key operations coded c++
+* Functions:
+select- return subset columns of df
+filter- extract subset of rows from df based logical conditions
+arrange- reorder rows of df
+rename- rename variables df
+mutate- add new variables/columns to transform existing variables
+summarise- generate summary statistics possibly within strata
+print- helps not print to much data to console
+* Properties: first argument df, then just name columns no $ 
+* Using dplyr:
+```{r}
+chicago=readRDS("week3/chicago.rds")
+dim(chicago)
+str(chicago)
+```
+```{r}
+library(dplyr)
+#select columns minus these columns
+head(select(chicago, -(city:dptp)))
+```
+```{r}
+#filter based on conditions
+chicago<-filter(chicago,pm25tmean2>30)
+chicago
+```
+```{r}
+#rename
+chicago <- rename(chicago,pm25=pm25tmean2,dewpoint=dptp)
+```
+```{r}
+#mutate create pm25trend shows deviations from the mean
+chicago<-mutate(chicago,pm25detrend=pm25-mean(pm25,na.rm=TRUE))
+```
+```{r}
+#Groupby categorical variable
+#create variable show hot or cold
+chicago<-mutate(chicago,tempcat=factor(1*(tmpd>80),labels = c("cold","hot")))
+hotcold<-group_by(chicago,tempcat)
+```
+```{r}
+#summarise data
+summarise(hotcold,pm25=mean(pm25),o3=max(o3tmean2),no2=median(no2tmean2))
+
+
+chicago %>% mutate(month = as.POSIXlt(date)$mon +1) %>% group_by(month) %>% summarise(pm25 =mean(pm25,na.rm = TRUE),o3=max(o3tmean2),no2=median(no2tmean2))
+```
+### Merging Data
+```{r}
+reviews=read.csv("week3/reviews.csv")
+solutions=read.csv("week3/solutions.csv")
+```
+* merge() important parameters:
+x,y,by,by.x,by.y,all
+* by defauly try merge on common name which isnt what we want as we want merge by solution_id in reviews with id in solutions:
+```{r}
+mergeddata=merge(reviews,solutions,by.x="solution_id",by.y="id",all=TRUE)
+#all means merge all data if not in one df use NA
+```
+```{r}
+#check common columns between df
+intersect(names(reviews),names(solutions))
+#will try merge on these shared columns if dont specify ending in disaster
+# Joining with plyr package is faster however cant merge unless change names of columns be exactly the same use dplyr change column name quicker need use = not<-
+solutions = rename(solutions,shared_id=id)
+reviews = rename(reviews,shared_id=solution_id)
+```
+```{r}
+#now able use dply as same column name
+arrange(join(reviews,solutions),shared_id)
+```
+* if multiple df:
+dfList = list (df1,df2,df3)
+join_all(dfList)
+
+swirl:
+```{r}
+# arrange() the result by size_mb, in descending order.
+#
+# If you want your results printed to the console, add
+# print to the end of your chain.
+
+cran %>%
+  select(ip_id, country, package, size) %>%
+  mutate(size_mb = size / 2^20) %>%
+  filter(size_mb <= 0.5) %>% arrange(desc(size_mb)) %>% print
+```
+```{r}
+#Tidying data with tidyr
+library(tidyr)
+data=data.frame(grade=c("A","B","C","D"),male=c(5,4,8,4),female=c(3,1,6,5))
+
+#gather(df,key,value{these are our column names},-grade{agther all column except this one})
+gather(students,sex,count,-grade)
+
+#seperate is used to seperate two categorical groups stored in one column
+# If you want to split by any non-alphanumeric value (the default):
+df <- data.frame(x = c(NA, "x.y", "x.z", "y.z"))
+df %>% separate(x, c("A", "B"))
+
+#Spread data allows you to take column two variables and split it :
+# Spread and gather are complements
+df <- data.frame(x = c("a", "b"), y = c(3, 4), z = c(5, 6))
+df %>% spread(x, y) %>% gather("x", "y", a:b, na.rm = TRUE)
+
+#http://rstudio-pubs-static.s3.amazonaws.com/160233_ea2b8175098d491497b8f991e6d1bf74.html
+parse_number(class5)
+```
 # Week 4
 ## Editing Variables
 ### Editing text variables
+```{r}
+cameradata<-read.csv("week4_assignment/cameras.csv")
+names(cameradata)
+
+#lower caps for all column names alt toupper()
+tolower(names(cameradata))
+
+#if want to split column names
+splitnames<-strsplit(names(cameradata),"\\.")
+#use \\ as . is a reserved character
+
+#see have 1 beside location get rid of it use:
+splitnames[[6]][1]
+#or create function case there are loads of variables with 1
+first_element<-function(x){x[1]}
+sapply(splitnames,first_element)
+```
+```{r}
+reviews<-read.csv("week4_assignment/reviews.csv")
+solutions<-read.csv("week4_assignment/solutions.csv")
+```
+```{r}
+names(reviews)
+#substitute 
+sub("_","",names(reviews))
+#gsub used replace more then one _
+
+#Finding values
+grep("Alameda",cameradata$intersection)#shows row index
+table(grepl("Alameda",cameradata$intersection))
+#want to subset data
+cameradata2<-cameradata[!grepl("Alameda",cameradata$intersection),]
+
+#want show the actual values
+grep("Alameda",cameradata$intersection,value = TRUE)
+```
+```{r}
+#more useful functions for string manipulations
+library(stringr)
+substr("Jonathan",1,3)
+paste("Jonathan","Alves")
+paste0("Jonathan","Alves")
+str_trim("Jonathan      ")
+```
 ### Regular Expressions
+* Combination of literals (text) and metacharacters (*/.,)
+* metacharacters used to express the whitespace word boundaries, beginning end line etc.
+* ^ e.g means ^i start of the sentence
+* $ e.g. morning$ means end of the sentence
+* [Bb][Uu][Ss][Hh]; list set of characters so can get Bush,bush,bushwalking, [Ii] am allows find; i am, I am
+* ^[0-9][a-zA-Z], start of the sentence number 0-9, followed by any letter with order being unimportant a-zA-Z | A-Za-z e.g 7th,5ft,1st and 3am. 
+* [^?.]$ : looking at end of the line looking for any character that doesnt end with ? or .
+* . means any character: 19.5 e.g. 1945,1955 etc
+* | allows alternatives: fire|all|those|... so match any line have fire all those. As many as want to search
+* Combination: ^[Gg]ood|[Bb]ad e.g will match good start of the line and then bad anywhere along the line
+* ^([Gg]ood|[Bb]ad): Both good/Good and Bad/bad at the start of the sentence
+*[Gg]eorge( [Ww]\.)? [Bb]ush: whether have W. w. initial thou doesnt have to have it. \ used as the escape character as . is a metacharscter 
+* (.*)- means any content within parenthesis even ()
+
+
+
+
+
+
 ### Working with Dates
 ### Data Resources
+
+
+
+```{r}
+#Load the datasets
+#features names
+features = read.table("week4_assignment/UCI HAR Dataset/features.txt")
+labels <- read.table("week4_assignment/UCI HAR Dataset/activity_labels.txt", col.names = c("code", "activity"))
+
+#Numeric data
+X_test=read.table("week4_assignment/UCI HAR Dataset/test/X_test.txt",col.names = features[,2])
+Y_test=read.table("week4_assignment/UCI HAR Dataset/test/Y_test.txt",col.names = "code")
+X_train=read.table("week4_assignment/UCI HAR Dataset/train/X_train.txt",col.names = features[,2])
+Y_train=read.table("week4_assignment/UCI HAR Dataset/train/y_train.txt",col.names = "code")
+
+#labels
+subject_test=read.table("week4_assignment/UCI HAR Dataset/test/subject_test.txt",col.names = "subject")
+subject_train=read.table("week4_assignment/UCI HAR Dataset/train/subject_train.txt",col.names = "subject")
+```
+```{r}
+# Merge the training and test set with the metadata
+X=rbind(X_train,X_test)
+Y=rbind(Y_train,Y_test)
+subject=rbind(subject_train,subject_test)
+data=cbind(X,Y,subject)
+```
+```{r}
+#extract the mean and sd for each measurement
+library(dplyr)
+tidy_data = data %>% select(contains(c("mean","std")),subject, code) %>% rename(activity = code)
+```
+```{r}
+#convert numeric
+tidy_data$activity=labels[tidy_data$activity,2]
+tidy_data$activity=as.factor(tidy_data$activity)
+```
+```{r}
+#appropriate descriptive names for the columns
+colname = c("Acc"= "Accelerometer","Gyro"= "Gyroscope","BodyBody"= "Body","Mag"= "Magnitude","^t"= "Time","^f"= "Frequency","tBody"= "TimeBody","-freq()"= "Frequency","angle"= "Angle","gravity"= "Gravity")
+
+for(a in names(colname)){
+  names(tidy_data)=gsub(a, colname[a], names(tidy_data))
+}
+```
+```{r}
+#Averages of each variable for each activity and subject
+final_tidy = tidy_data %>% group_by(subject,activity) %>% summarise_all(list(mean))
+final_tidy
+```
+```{r}
+write.table(final_tidy, "final_tidy.txt", row.name=FALSE)
+```
+
+
+
+
+
+
+
+
+
 
 

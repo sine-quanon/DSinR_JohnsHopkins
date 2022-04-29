@@ -1,0 +1,52 @@
+---
+title: "Exploratory Data Analysis"
+output: html_notebook
+---
+
+# Week1
+## Graphs
+### Principles of Analytic Graphics
+### Exploratory Graphs
+## Plotting
+### Plotting Systems in R
+### Base Plotting System
+### Base Plotting Demonstration
+## Graphic Devices
+### Graphoc Devices in R
+
+# Week 2
+## Lattice Plotting System
+### Lattice Plotting System
+## ggplot2
+### ggplot2
+
+# Week 3
+## Hierarchical Clustering
+### Hierarchical Clustering
+## K-Means Clustering & Dimension Reduction
+### K-Means
+### Dimension Reduction
+## Working with Color
+### Working with Color in R Plots
+
+# Week 4
+## Case Studies
+### Clustering
+### Air Pollution
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
